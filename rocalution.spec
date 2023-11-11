@@ -27,6 +27,7 @@ License:        MIT
 ExclusiveArch:  x86_64
 
 Source0:        %{url}/archive/refs/tags/rocm-%{version}.tar.gz#/%{upstreamname}-%{version}.tar.gz
+Patch0:         0001-prepare-rocalution-cmake-for-fedora.patch
 
 BuildRequires:  cmake
 BuildRequires:  clang-devel
