@@ -72,9 +72,43 @@ if(SUPPORT_MPI)
   list(APPEND SOURCE ${UTILS_MPI_SOURCES})
 endif()
 
+# Create rocALUTION hip library
+if(SUPPORT_HIP)
+  # Flag source file as a hip source file
+  foreach(i ${HIP_SOURCES})
+    set_source_files_properties(${i} PROPERTIES HIP_SOURCE_PROPERTY_FORMAT TRUE)
+  endforeach()
+
+  # HIP flags workaround while target_compile_options do not work
+  list(APPEND HIP_HIPCC_FLAGS "-O3 -fPIC -std=c++14")
+  foreach(target ${AMDGPU_TARGETS})
+    list(APPEND HIP_HIPCC_FLAGS "--offload-arch=${target}")
+  endforeach()
+
+  # Create rocALUTION HIP library
+  # if(WIN32)
+  #  add_library(rocalution_hip OBJECT ${HIP_SOURCES})
+  # else()
+  #  hip_add_library(rocalution_hip ${HIP_SOURCES})
+  # endif()
+  #
+  # rocm_set_soversion(rocalution_hip ${rocalution_SOVERSION})
+  # set_target_properties(rocalution_hip PROPERTIES DEBUG_POSTFIX "-d")
+  # 
+  # if(WIN32)
+  #  target_link_libraries(rocalution_hip PRIVATE roc::rocblas roc::rocsparse roc::rocprim roc::rocrand hip::device)
+  # else()
+  #  target_link_libraries(rocalution_hip PRIVATE roc::rocblas roc::rocsparse roc::rocprim roc::rocrand)
+  # endif()
+
+  list(APPEND SOURCE ${HIP_SOURCES})
+  # target_link_libraries(rocalution PRIVATE rocalution_hip hip::host)
+endif()
+
 # Create rocALUTION host library
 add_library(rocalution ${SOURCE} ${PUBLIC_HEADERS})
 add_library(roc::rocalution ALIAS rocalution)
+target_link_libraries(rocalution PRIVATE roc::rocblas roc::rocsparse roc::rocprim roc::rocrand)
 
 # Target link libraries
 if(SUPPORT_OMP)
@@ -112,38 +146,6 @@ generate_export_header(rocalution EXPORT_FILE_NAME ${PROJECT_BINARY_DIR}/include
 list(APPEND CMAKE_HOST_FLAGS "-O3")
 target_compile_options(rocalution PRIVATE ${CMAKE_HOST_FLAGS})
 
-# Create rocALUTION hip library
-if(SUPPORT_HIP)
-  # Flag source file as a hip source file
-  foreach(i ${HIP_SOURCES})
-    set_source_files_properties(${i} PROPERTIES HIP_SOURCE_PROPERTY_FORMAT TRUE)
-  endforeach()
-
-  # HIP flags workaround while target_compile_options do not work
-  list(APPEND HIP_HIPCC_FLAGS "-O3 -fPIC -std=c++14")
-  foreach(target ${AMDGPU_TARGETS})
-    list(APPEND HIP_HIPCC_FLAGS "--offload-arch=${target}")
-  endforeach()
-
-  # Create rocALUTION HIP library
-  if(WIN32)
-    add_library(rocalution_hip OBJECT ${HIP_SOURCES})
-  else()
-    hip_add_library(rocalution_hip ${HIP_SOURCES})
-  endif()
-
-  rocm_set_soversion(rocalution_hip ${rocalution_SOVERSION})
-  set_target_properties(rocalution_hip PROPERTIES DEBUG_POSTFIX "-d")
-
-  if(WIN32)
-    target_link_libraries(rocalution_hip PRIVATE roc::rocblas roc::rocsparse roc::rocprim roc::rocrand hip::device)
-  else()
-    target_link_libraries(rocalution_hip PRIVATE roc::rocblas roc::rocsparse roc::rocprim roc::rocrand)
-  endif()
-
-  target_link_libraries(rocalution PRIVATE rocalution_hip hip::host)
-endif()
-
 set_target_properties(rocalution PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/staging")
 
 if(WIN32 AND BUILD_CLIENTS AND BUILD_SHARED_LIBS)
@@ -176,10 +178,10 @@ endif( )
 
 # Install targets
 if(SUPPORT_HIP)
-  rocm_install_targets(TARGETS rocalution rocalution_hip
-                       INCLUDE ${CMAKE_BINARY_DIR}/include
-                       )
-else()
+#  rocm_install_targets(TARGETS rocalution rocalution_hip
+#                       INCLUDE ${CMAKE_BINARY_DIR}/include
+#                       )
+#else()
   rocm_install_targets(TARGETS rocalution
                        INCLUDE ${CMAKE_BINARY_DIR}/include
                        )
