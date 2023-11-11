@@ -33,6 +33,7 @@ BuildRequires:  clang-devel
 BuildRequires:  compiler-rt
 BuildRequires:  lld
 BuildRequires:  llvm-devel
+BuildRequires:  ninja-build
 BuildRequires:  rocblas-devel
 BuildRequires:  rocm-cmake
 BuildRequires:  rocm-comgr-devel
@@ -40,6 +41,7 @@ BuildRequires:  rocm-hip-devel
 BuildRequires:  rocm-runtime-devel
 BuildRequires:  rocm-runtime-devel
 BuildRequires:  rocm-rpm-macros
+BuildRequires:  rocprim-devel
 BuildRequires:  rocrand-devel
 BuildRequires:  rocsparse-devel
 
@@ -86,7 +88,7 @@ for gpu in %{rocm_gpu_list}
 do
     module load rocm/$gpu
     %cmake %rocm_cmake_options \
-	   -DCMAKE_MODULE_PATH=%{_libdir}/cmake/hip \
+           -DCMAKE_MODULE_PATH=%{_libdir}/cmake/hip \
            -DHIP_ROOT_DIR=%{_prefix} \
 %if %{with test}
            -DBUILD_CLIENTS_TESTS=ON
@@ -101,6 +103,19 @@ for gpu in %{rocm_gpu_list}
 do
     %cmake_install
 done
+
+# strip *.so
+strip %{buildroot}%{_libdir}/librocalution.so.0.*
+strip %{buildroot}%{_libdir}/librocalution_hip.so.0.*
+strip %{buildroot}%{_libdir}/rocm/gfx10/lib/librocalution.so.0.*
+strip %{buildroot}%{_libdir}/rocm/gfx10/lib/librocalution_hip.so.0.*
+strip %{buildroot}%{_libdir}/rocm/gfx11/lib/librocalution.so.0.*
+strip %{buildroot}%{_libdir}/rocm/gfx11/lib/librocalution_hip.so.0.*
+strip %{buildroot}%{_libdir}/rocm/gfx8/lib/librocalution.so.0.*
+strip %{buildroot}%{_libdir}/rocm/gfx8/lib/librocalution_hip.so.0.*
+strip %{buildroot}%{_libdir}/rocm/gfx9/lib/librocalution.so.0.*
+strip %{buildroot}%{_libdir}/rocm/gfx9/lib/librocalution_hip.so.0.*
+
 
 %files
 %license LICENSE.md
@@ -148,5 +163,5 @@ done
 %endif
 
 %changelog
-* Sat Nov 11 2023 Tom Rix <trix@redhat.com>
+* Sat Nov 11 2023 Tom Rix <trix@redhat.com> 5.7.1-1
 - Initial project
