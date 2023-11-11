@@ -27,6 +27,7 @@ License:        MIT
 ExclusiveArch:  x86_64
 
 Source0:        %{url}/archive/refs/tags/rocm-%{version}.tar.gz#/%{upstreamname}-%{version}.tar.gz
+# combine libs because of circular dependency reported in fedora-review
 Patch0:         0001-prepare-rocalution-cmake-for-fedora.patch
 
 BuildRequires:  cmake
@@ -107,24 +108,16 @@ done
 
 # strip *.so
 strip %{buildroot}%{_libdir}/librocalution.so.0.*
-strip %{buildroot}%{_libdir}/librocalution_hip.so.0.*
 strip %{buildroot}%{_libdir}/rocm/gfx10/lib/librocalution.so.0.*
-strip %{buildroot}%{_libdir}/rocm/gfx10/lib/librocalution_hip.so.0.*
 strip %{buildroot}%{_libdir}/rocm/gfx11/lib/librocalution.so.0.*
-strip %{buildroot}%{_libdir}/rocm/gfx11/lib/librocalution_hip.so.0.*
 strip %{buildroot}%{_libdir}/rocm/gfx8/lib/librocalution.so.0.*
-strip %{buildroot}%{_libdir}/rocm/gfx8/lib/librocalution_hip.so.0.*
 strip %{buildroot}%{_libdir}/rocm/gfx9/lib/librocalution.so.0.*
-strip %{buildroot}%{_libdir}/rocm/gfx9/lib/librocalution_hip.so.0.*
-
 
 %files
 %license LICENSE.md
 %exclude %{_docdir}/%{name}/LICENSE.md
 %{_libdir}/lib%{name}.so.*
-%{_libdir}/lib%{name}_hip.so.*
 %{_libdir}/rocm/gfx*/lib/lib%{name}.so.*
-%{_libdir}/rocm/gfx*/lib/lib%{name}_hip.so.*
 
 %files devel
 %dir %{_includedir}/%{name}
@@ -152,9 +145,7 @@ strip %{buildroot}%{_libdir}/rocm/gfx9/lib/librocalution_hip.so.0.*
 %{_includedir}/%{name}/solvers/preconditioners/*.hpp
 %{_libdir}/cmake/%{name}/*.cmake
 %{_libdir}/lib%{name}.so
-%{_libdir}/lib%{name}_hip.so
 %{_libdir}/rocm/gfx*/lib/lib%{name}.so
-%{_libdir}/rocm/gfx*/lib/lib%{name}_hip.so
 %{_libdir}/rocm/gfx*/lib/cmake/%{name}/*.cmake
 
 %if %{with test}
